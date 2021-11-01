@@ -1,25 +1,85 @@
-import logo from './logo.svg';
-import './App.css';
+import React, {useEffect,useState} from "react";
 
-function App() {
+
+import Header from "./components/Header";
+import Loader from "./components/Loader";
+import Todo from "./components/Todo"
+
+import "./style/App.css"
+
+const App = () => {
+
+
+  // STATE
+
+  const [todoList, setTodoList] = useState([]);
+  const [completedList, setCompletedList] = useState(null)
+
+  // EFFECT
+
+  useEffect(() => {
+
+    const handleTodoList = async () => {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/todos"
+      );
+      const result = await response.json();
+      const resultTodoList = result.slice(0, 20);
+      setTodoList(resultTodoList);
+    };
+    handleTodoList();
+  }, []);
+
+
+
+  // FUNCIONES
+  const handleCompleteTodo = id => {
+    setTodoList(
+      todoList.map(todo =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+
+  const handleCompletedTodo =  ()  => {
+    setCompletedList ("completed")
+  }
+
+  const handleUnCompletedTodo = id => {
+    setCompletedList ("uncompleted")
+  }
+
+  const handleTodo = () => {
+    setCompletedList (null)
+  }
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Header
+      handleCompletedTodo={handleCompletedTodo}
+      handleUnCompletedTodo={handleUnCompletedTodo}
+      handleTodo={handleTodo}
+      />
+
+      <div className="todo-container">
+        {todoList && todoList.length > 0 ? (
+          todoList.map(singleTodo => (
+            <Todo
+              key={singleTodo.id}
+              title={singleTodo.title}
+              status={singleTodo.completed}
+              handleCompleteTodo={handleCompleteTodo}
+              id={singleTodo.id}
+              completedList={completedList}
+            />
+          ))
+        ) : (
+          <Loader />
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
